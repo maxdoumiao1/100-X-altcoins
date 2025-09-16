@@ -21,4 +21,5 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           LUNARCRUSH_KEY: ${{ secrets.LUNARCRUSH_KEY }}
           DUNE_KEY: ${{ secrets.DUNE_KEY }}
+          DUNE_QUERY_ID: ${{ secrets.DUNE_QUERY_ID }}  
         run: python signals_worker.py
