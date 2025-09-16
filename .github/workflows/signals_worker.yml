@@ -23,3 +23,11 @@ jobs:
           DUNE_KEY: ${{ secrets.DUNE_KEY }}
           DUNE_QUERY_ID: ${{ secrets.DUNE_QUERY_ID }}  
         run: python signals_worker.py
+        
+       - name: Notify Apps Script to finalize & mail
+         env:
+          GAS_WEBHOOK_URL: ${{ secrets.GAS_WEBHOOK_URL }}
+          GAS_WEBHOOK_SECRET: ${{ secrets.GAS_WEBHOOK_SECRET }}
+        run: |
+          curl -s -X POST "$GAS_WEBHOOK_URL?token=$GAS_WEBHOOK_SECRET" || true
+
