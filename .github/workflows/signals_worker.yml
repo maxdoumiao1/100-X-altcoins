@@ -3,29 +3,37 @@ on:
   schedule:
     - cron: '0 * * * *'   # every hour
   workflow_dispatch: {}
+
 concurrency:
   group: signals-worker
   cancel-in-progress: true
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - run: pip install -r requirements.txt
+
       - name: Run worker
         env:
           GOOGLE_SHEETS_ID: ${{ secrets.GOOGLE_SHEETS_ID }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           LUNARCRUSH_KEY: ${{ secrets.LUNARCRUSH_KEY }}
           DUNE_KEY: ${{ secrets.DUNE_KEY }}
-          DUNE_QUERY_ID: ${{ secrets.DUNE_QUERY_ID }}  
+          DUNE_QUERY_ID: ${{ secrets.DUNE_QUERY_ID }}
+          MAX_CONCURRENCY: "2"           # 建议先降并发，避免 Dune 429
+          DUNE_POLL_MAX_SEC: "120"
         run: python signals_worker.py
-        
-       - name: Notify Apps Script to finalize & mail
-         env:
+
+      - name: Notify Apps Script to finalize & mail
+        if: ${{ always() }}              # 不让这一步失败卡住整条流水线
+        env:
           GAS_WEBHOOK_URL: ${{ secrets.GAS_WEBHOOK_URL }}
           GAS_WEBHOOK_SECRET: ${{ secrets.GAS_WEBHOOK_SECRET }}
         run: |
